@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+    <title>Usando Mongo</title>
+</head>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% set last_message = messages[-1] %}
+
+<script>
+    window.alert('{{ last_message[1] }}')
+</script>
+
+{% endif %}
+{% endwith %}
+{% block body %}{% endblock %}
+
+<body>
+    <center>
+        <h1>🤖 Bienvenido 🤖</h1>
+        <hr class="linea">
+
+        <form class="form-registro" action="/guardar_personas" method="post">
+            <h3>Formulario de registro</h3>
+            <input class="controls" type="text" name="nombre" placeholder="Nombre" />
+            <input class="controls" type="text" name="apellido" placeholder="Apellido" />
+            <input class="controls" type="text" name="telefono" placeholder="Telefono" />
+            <div class="estado-civil">
+                <p class="controls">Estado civil</p>
+                <select class="controls" name="estado_civil">
+                    <option value="casado"></option>
+                    <option value="casado">Casado</option>
+                    <option value="soltero">Soltero</option>
+                </select>
+            </div>
+            <input class="controls" type="number" name="horas_trabajo" placeholder="Horas de trabajo a la semana" />
+            <button type="submit">Guardar</button>
+
+        </form>
+        <hr class="linea">
+        <div class="tabla-container">
+        <h2>Registros de Personas 👩‍💻</h2>
+        <table class="tabla-personas">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Estado Civil</th>
+                    <th>Horas de Trabajo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for persona in personas %}
+                <tr>
+                    <form action="/editar_persona/{{ persona._id }}" method="post">
+                        <td>{{ persona._id }}</td>
+                        <td><input type="text" name="nombre" value="{{ persona.nombre }}"></td>
+                        <td><input type="text" name="apellido" value="{{ persona.apellido }}"></td>
+                        <td><input type="text" name="telefono" value="{{ persona.telefono }}"></td>
+                        <td><input type="text" name="estado_civil" value="{{ persona.estado_civil }}" placeholder="Casado o Soltero"></td>
+                        <td><input type="number" name="horas_trabajo" value="{{ persona.horas_trabajo }}"></td>
+                        <td>
+
+                            <button class="button-actualizar" type="submit"
+                                onclick="return confirm('¿Esta seguro que desea actualizar este documento?')">Actualizar</button>
+                            <button class="button-eliminar" ><a href="{{ url_for('eliminar', id_persona=persona._id )}}"
+                                    onclick="return confirm('¿Esta seguro que desea eliminar este documento?')">Eliminar</a></button>
+                    </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button class="button-consultar" ><a href="/">Ver registros</a></button>
+    </div>
+    <hr class="linea">
+    <div class="tabla-container">
+    <h2>Consultas 📃</h2>
+    <h3>Ordenar por campo Asc o Desc</h3>
+        <form action="/ordenar" method="get">
+            <input class="controls-2" type="text" name="campo" placeholder="Nombre del campo">
+            <input class="controls-2" type="text" name="tipo" placeholder="Ascendente o Descendente">
+            <button class="button-consultar" type="submit">Consultar</button>
+        </form>
+        <table class="tabla-personas">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Telefono</th>
+                    <th>Estado Civil</th>
+                    <th>Horas_Trabajo_Semana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for persona in orden %}
+                <tr>
+                    <td>{{ persona.nombre }}</td>
+                    <td>{{ persona.apellido }}</td>
+                    <td>{{ persona.telefono }}</td>
+                    <td>{{ persona.estado_civil }}</td>
+                    <td>{{ persona.horas_trabajo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h3>Limitar el numero de resultados</h3>
+        <form action="/limite" method="get">
+            <input class="controls-2" type="number" name="limite" placeholder="Numero de consultas">
+            <button class="button-consultar" type="submit">Consultar</button>
+        </form>
+        <table class="tabla-personas">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Telefono</th>
+                    <th>Estado Civil</th>
+                    <th>Horas_Trabajo_Semana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for persona in primeras_personas %}
+                <tr>
+                    <td>{{ persona.nombre }}</td>
+                    <td>{{ persona.apellido }}</td>
+                    <td>{{ persona.telefono }}</td>
+                    <td>{{ persona.estado_civil }}</td>
+                    <td>{{ persona.horas_trabajo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h3>Comparación mayor que</h3>
+        <form action="/mayor" method="get">
+            <input class="controls-2" type="number" name="mayor" placeholder="Limite Inferior">
+            <button class="button-consultar" type="submit">Consultar</button>
+        </form>
+        <table class="tabla-personas">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Telefono</th>
+                    <th>Estado Civil</th>
+                    <th>Horas_Trabajo_Semana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for persona in mayor %}
+                <tr>
+                    <td>{{ persona.nombre }}</td>
+                    <td>{{ persona.apellido }}</td>
+                    <td>{{ persona.telefono }}</td>
+                    <td>{{ persona.estado_civil }}</td>
+                    <td>{{ persona.horas_trabajo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h3>Comparación menor que</h3>
+        <form action="/menor" method="get">
+            <input class="controls-2" type="number" name="menor" placeholder="Limite superior">
+            <button class="button-consultar" type="submit">Consultar</button>
+        </form>
+        <table class="tabla-personas">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Telefono</th>
+                    <th>Estado Civil</th>
+                    <th>Horas_Trabajo_Semana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for persona in menor %}
+                <tr>
+                    <td>{{ persona.nombre }}</td>
+                    <td>{{ persona.apellido }}</td>
+                    <td>{{ persona.telefono }}</td>
+                    <td>{{ persona.estado_civil }}</td>
+                    <td>{{ persona.horas_trabajo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <h3>Filtro: Campo -> valor </h3>
+        <form action="/filtro" method="get">
+            <input class="controls-2" type="text" name="campo" placeholder="Nombre del campo">
+            <input class="controls-2" type="text" name="valor" placeholder="Valor a buscar">
+            <button class="button-consultar" type="submit">Consultar</button>
+        </form>
+        <table class="tabla-personas">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Telefono</th>
+                    <th>Estado Civil</th>
+                    <th>Horas_Trabajo_Semana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for persona in filtro %}
+                <tr>
+                    <td>{{ persona.nombre }}</td>
+                    <td>{{ persona.apellido }}</td>
+                    <td>{{ persona.telefono }}</td>
+                    <td>{{ persona.estado_civil }}</td>
+                    <td>{{ persona.horas_trabajo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </center>
+
+</body>
+<hr class="linea">
+</html>
